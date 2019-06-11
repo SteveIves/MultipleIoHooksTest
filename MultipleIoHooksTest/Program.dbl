@@ -1,9 +1,82 @@
 
+import Synergex.SynergyDE.IOExtensions
+
+namespace MyNs
+
+    public class MyHooks1 extends IOHooks
+    
+        public method MyHooks1
+            required in aChannel, n
+            endparams
+            parent(aChannel)
+        proc
+            
+        endmethod
+
+        public override method reads_post_operation_hook, void
+            inout buffer,                       a
+            in optional out_rfa,                a
+            in flags,                           IOFlags
+            inout error,                        int
+            endparams
+            external common
+                tt, int
+            endcommon
+        proc
+            writes(tt,"In MyHooks1.reads_post_operation_hook")
+        endmethod
+
+    endclass
+
+    public class MyHooks2 extends MyHooks1
+
+        public method MyHooks2
+            required in aChannel, n
+            endparams
+            parent(aChannel)
+        proc
+            
+        endmethod
+
+        public override method reads_post_operation_hook, void
+            inout buffer,                       a
+            in optional out_rfa,                a
+            in flags,                           IOFlags
+            inout error,                        int
+            endparams
+            external common
+                tt, int
+            endcommon
+        proc
+            parent.reads_post_operation_hook(buffer,out_rfa,flags,error)
+            writes(tt,"In MyHooks2.reads_post_operation_hook")
+        endmethod
+
+    endclass
+
+endnamespace
+
 ;;; <summary>
 ;;; The main entry point for the application.
 ;;; </summary>
 main
-
-proc
-
+    global common
+        tt, int
+    endcommon
+    record
+        chn, i4
+        rec, a218
+    endrecord
+proc 
+    open(tt=0,i,"tt:")
+    open(chn=0,i:i,"DBLDIR:syntxt.ism")
+    new MyHooks2(chn)
+    repeat 
+    begin
+        reads(chn,rec,eof)
+    end
+eof,
+    close chn
+    close tt
 endmain
+
